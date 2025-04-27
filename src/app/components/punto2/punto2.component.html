@@ -1,0 +1,74 @@
+<div class="row">
+  <div class="row justify-content-center col-11 col-md-11 mt-2">
+    <div
+      *ngFor="let p of productos"
+      class="card text-center mx-2 my-2 flex-wrap shadow-sm hover-shadow"
+      style="width: 18rem"
+    >
+      <img src="images/productos/{{ p.img }}" class="card-img-top" alt="..." />
+      <div class="card-body">
+        <h5 class="card-title">{{ p.nombre }}</h5>
+        <p class="card-text">{{ p.descripcion }}</p>
+        <p class="card-text">{{ p.precio }}$</p>
+        <button
+          class="btn"
+          [class.btn-success]="!estaEnCarrito(p)"
+          [class.btn-danger]="estaEnCarrito(p)"
+          [disabled]="estaEnCarrito(p)"
+          (click)="agregarAlCarrito(p)"
+        >
+          {{ estaEnCarrito(p) ? "Sin stock" : "Agregar al carrito" }}
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="position-relative col-1 col-md-1 justify-content-end">
+    <button
+      class="btn btn-primary position-absolute top-0 end-0 m-3"
+      data-bs-toggle="modal"
+      data-bs-target="#carritoModal"
+    >
+      🛒({{ arrayCarrito.length }})
+    </button>
+  </div>
+</div>
+
+
+<!-- MODAL -->
+<div class="modal fade" id="carritoModal" tabindex="-1" aria-labelledby="carritoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="carritoModalLabel">Carrito de Compras</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="arrayCarrito.length > 0; else vacio">
+          <ul class="list-group">
+            <li
+              class="list-group-item d-flex justify-content-between align-items-center"
+              *ngFor="let prod of arrayCarrito"
+            >
+              <div class="d-flex align-items-center">
+                <img src="images/productos/{{prod.img}}" alt="{{prod.nombre}}" width="50" class="me-3" />
+                <div>
+                  <strong>{{ prod.nombre }}</strong><br />
+                  ${{ prod.precio }}
+                </div>
+              </div>
+              <button class="btn btn-sm btn-danger" (click)="eliminarDelCarrito(prod)">Eliminar</button>
+            </li>
+          </ul>
+          <hr />
+          <div class="d-flex justify-content-between">
+            <h5>Total: ${{ calcularTotal() }}</h5>
+            <button class="btn btn-outline-danger btn-sm" (click)="vaciarCarrito()">Vaciar carrito</button>
+          </div>
+        </div>
+        <ng-template #vacio>
+          <p class="text-center">El carrito está vacío.</p>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</div>
