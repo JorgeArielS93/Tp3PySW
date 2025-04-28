@@ -1,90 +1,78 @@
-<!-- <div class="row">
-  <h1>Test binding Angular</h1>
-  <p>{{ contador }}</p>
-  <div class="btn-group mt-4" role="group" aria-label="Basic example">
-    <button type="button" class="btn btn-danger" (click)="decrementar()">
-      Disminuir
-    </button>
-    <button type="button" class="btn btn-info" (click)="reestrablecer()">
-      Reestablecer
-    </button>
-    <button type="button" class="btn btn-success" (click)="incrementar()">
-      Incrementar
-    </button>
-  </div>
-</div> -->
-<!-- Contenedor principal para el título del juego -->
+<!-- Contenedor principal del juego del ahorcado -->
 <div class="row d-flex justify-content-center">
-    <!-- Sección del título y subtítulo -->
-    <div class="text-center">
-      <h1>Juego del ahorcado</h1> <!-- Título del juego -->
-      <h2>Adivina el nombre del Animal!!!</h2> <!-- Subtítulo indicando el objetivo del juego -->
+  <!-- Títulos principales del juego -->
+  <div class="text-center">
+    <h1>Juego del ahorcado</h1> <!-- Título principal -->
+    <h2>Adivina el nombre del Animal!!!</h2> <!-- Subtítulo descriptivo -->
+  </div>
+
+  <!-- Tarjeta que muestra la imagen del ahorcado y el progreso de la palabra -->
+  <div class="card text-center" style="width: 30rem;">
+    <!-- Imagen dinámica del estado actual del ahorcado -->
+    <img [src]="imagenActual" class="card-img-top" alt="Imagen Ahorcado" />
+    <div class="card-body">
+      <!-- Progreso de la palabra mostrada con letras adivinadas y guiones bajos -->
+      <p class="card-text">
+        {{ palabraMostrada.join(' ') }}
+      </p>
     </div>
-  
-    <!-- Card que muestra la imagen del ahorcado y la palabra mostrada -->
-    <div class="card text-center" style="width: 30rem;">
-      <!-- Imagen que cambia según los intentos realizados, vinculada a la variable imagenActual -->
-      <img [src]="juegoService.imagenActual" class="card-img-top" alt="Imagen Ahorcado" />
-      <div class="card-body">
-        <!-- Muestra la palabra actual, con las letras adivinadas y los _ para las no adivinadas -->
-        <p class="card-text">
-          {{ juegoService.palabraMostrada }}
-        </p>
+  </div>
+</div>
+
+<!-- Contenedor de los botones de letras para adivinar -->
+<div class="container text-center mt-4">
+  <div class="row">
+    <div class="col-12">
+      <!-- Primera fila de botones: letras de la A a la M -->
+      <div class="btn-group mb-3 flex-wrap">
+        <button *ngFor="let letra of abecedario.slice(0, 13)" 
+                type="button"
+                class="btn btn-success m-1" 
+                [disabled]="letrasDesactivadas.includes(letra)" 
+                (click)="desactivarLetra(letra)">
+          {{ letra }}
+        </button>
+      </div>
+    </div>
+    <div class="col-12">
+      <!-- Segunda fila de botones: letras de la N a la Z -->
+      <div class="btn-group flex-wrap">
+        <button *ngFor="let letra of abecedario.slice(13)" 
+                type="button"
+                class="btn btn-success m-1" 
+                [disabled]="letrasDesactivadas.includes(letra)" 
+                (click)="desactivarLetra(letra)">
+          {{ letra }}
+        </button>
       </div>
     </div>
   </div>
-  
-  <!-- Contenedor de las letras para adivinar, se dividen en dos filas -->
-  <div class="container text-center mt-4">
-    <div class="row">
-      <div class="col-12">
-        <!-- Primera fila de botones con las primeras 13 letras del abecedario -->
-        <div class="btn-group mb-3 flex-wrap">
-          <button *ngFor="let letra of abecedario.slice(0, 13)" 
-                  type="button"
-                  class="btn btn-success m-1" 
-                  [disabled]="juegoService.letrasDesactivadas" 
-                  (click)="desactivarLetra(letra)">
-            {{ letra }}
-          </button>
-        </div>
+</div>
+
+<!-- Modal que muestra el resultado (ganar o perder) al finalizar el juego -->
+<div class="modal fade" id="resultadoModal" tabindex="-1" aria-labelledby="resultadoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center">
+      <!-- Encabezado del modal con el título dinámico -->
+      <div class="modal-header">
+        <h5 class="modal-title" id="resultadoModalLabel">{{ resultadoTitulo }}</h5>
+        <!-- Botón para cerrar el modal y reiniciar el juego -->
+        <button type="button" class="btn-close" (click)="reiniciarJuego()" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
-      <div class="col-12">
-        <!-- Segunda fila de botones con las últimas 13 letras del abecedario -->
-        <div class="btn-group flex-wrap">
-          <button *ngFor="let letra of abecedario.slice(13)" 
-                  type="button"
-                  class="btn btn-success m-1" 
-                  [disabled]="juegoService.letrasDesactivadas" 
-                  (click)="desactivarLetra(letra)">
-            {{ letra }}
-          </button>
-        </div>
+
+      <!-- Cuerpo del modal: muestra el mensaje, aciertos y errores -->
+      <div class="modal-body">
+        <p>{{ resultadoMensaje }}</p> <!-- Mensaje dinámico de resultado -->
+        <p><strong>Aciertos:</strong> {{ aciertos }}</p> <!-- Cantidad de aciertos -->
+        <p><strong>Errores:</strong> {{ errores }}</p> <!-- Cantidad de errores -->
+      </div>
+
+      <!-- Pie del modal con botón para reiniciar -->
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-primary" (click)="reiniciarJuego()" data-bs-dismiss="modal">
+          Jugar de nuevo
+        </button>
       </div>
     </div>
   </div>
-  
-  <!-- Modal que se muestra cuando el jugador gana o pierde -->
-  <div class="modal fade" id="resultadoModal" tabindex="-1" aria-labelledby="resultadoModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content text-center">
-        <div class="modal-header">
-          <!-- Título del modal (Ganaste o Perdiste) -->
-          <h5 class="modal-title" id="resultadoModalLabel">{{ resultadoTitulo }}</h5>
-          <!-- Botón para cerrar el modal y reiniciar el juego -->
-          <button type="button" class="btn-close" (click)="reiniciarJuego()" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-        </div>
-        <div class="modal-body">
-          <!-- Mensaje mostrado al jugador con el resultado del juego -->
-          <p>{{ resultadoMensaje }}</p>
-          <!-- Mostrar el número de aciertos y errores -->
-          <p><strong>Aciertos:</strong> {{ juegoService.aciertos }}</p>
-          <p><strong>Errores:</strong> {{ juegoService.errores }}</p>
-        </div>
-        <div class="modal-footer justify-content-center">
-          <!-- Botón para jugar de nuevo -->
-          <button type="button" class="btn btn-primary" (click)="reiniciarJuego()" data-bs-dismiss="modal">Jugar de nuevo</button>
-        </div>
-      </div>
-    </div>
-  </div>
+</div>

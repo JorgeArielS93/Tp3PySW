@@ -4,7 +4,12 @@ import { Animal } from '../models/animal';
 @Injectable({
   providedIn: 'root',
 })
+
 export class JuegoAhorcadoService {
+  /**
+   * Array de animales disponibles para jugar.
+   * Cada animal tiene un nombre que será la palabra a adivinar.
+   */
   private animales: Animal[] = [
     { nombre: 'CANGURO' },
     { nombre: 'TIGRE' },
@@ -18,116 +23,122 @@ export class JuegoAhorcadoService {
     { nombre: 'ELEFANTE' }
   ];
 
- /** 
- * Palabra completa que el jugador debe adivinar. 
- */
-palabra: string = '';
-
-/** 
- * Representación de la palabra a adivinar, mostrando letras reveladas y guiones bajos ('_') en lugar de las ocultas. 
- */
-palabraMostrada: string[] = [];
-
-/** 
- * Letras que el jugador ya ha seleccionado y que deben estar desactivadas en la interfaz para evitar repetirlas. 
- */
-letrasDesactivadas: string[] = [];
-
-/** 
- * Número de letras correctamente adivinadas por el jugador. 
- */
-aciertos: number = 0;
-
-/** 
- * Número de errores cometidos al seleccionar letras incorrectas. 
- */
-errores: number = 0;
-
-/** 
- * Número máximo de intentos permitidos antes de que el jugador pierda. 
- */
-intentosMaximos: number = 5;
-
-/** 
- * Número de intentos realizados hasta el momento en la partida actual. 
- */
-intentosActuales: number = 0;
-
-/** 
- * Ruta de la imagen que representa el estado actual del ahorcado (cambia con cada error). 
- */
-imagenActual: string = 'images/ahorcado/ahorcado0.png';
-
-/**
- * Constructor de la clase.
- * - Inicializa automáticamente una nueva partida al crear una instancia del servicio.
- */
-constructor() {
-  this.iniciarJuego();
-}
-
+  /**
+   * Palabra seleccionada que el jugador debe adivinar.
+   */
+  palabra: string = '';
 
   /**
- * Inicializa o reinicia el juego del ahorcado.
- * - Selecciona aleatoriamente un animal de la lista disponible.
- * - Prepara la palabra mostrada con guiones bajos ('_') en lugar de letras, revelando solo la primera letra.
- * - Resetea las letras desactivadas, los contadores de aciertos y errores, los intentos realizados y la imagen mostrada.
- */
-iniciarJuego(): void {
-  const animalAleatorio = this.animales[Math.floor(Math.random() * this.animales.length)];
-  this.palabra = animalAleatorio.nombre;
-  this.palabraMostrada = Array(this.palabra.length).fill('_');
-  this.palabraMostrada[0] = this.palabra[0];
+   * Representación visual de la palabra a adivinar.
+   * Letras no adivinadas se muestran como guiones bajos `_`.
+   */
+  palabraMostrada: string[] = [];
 
-  this.letrasDesactivadas = [];
-  this.aciertos = 0;
-  this.errores = 0;
-  this.intentosActuales = 0;
-  this.imagenActual = 'images/ahorcado/ahorcado0.png';
-}
+  /**
+   * Array que guarda las letras que el jugador ya ha seleccionado (para deshabilitar los botones).
+   */
+  letrasDesactivadas: string[] = [];
 
-/**
- * Procesa la letra seleccionada por el usuario.
- * 
- * - Marca la letra como desactivada para que no pueda seleccionarse nuevamente.
- * - Verifica si la letra existe en la palabra a adivinar.
- *   - Si acierta, revela la letra en la palabra mostrada y aumenta el contador de aciertos.
- *   - Si no acierta, incrementa los errores, actualiza la imagen del ahorcado y los intentos actuales.
- * - Evalúa si el jugador ha ganado (adivinó toda la palabra) o perdido (agotó los intentos).
- * 
- * @param letra Letra seleccionada por el usuario.
- * @returns Un objeto indicando el estado del juego:
- *  - 'victoria' si adivinó toda la palabra,
- *  - 'derrota' si se agotaron los intentos,
- *  - 'ninguno' si el juego sigue en curso.
- *  También puede incluir un mensaje para mostrar en el modal.
- */
-intentarLetra(letra: string): { resultado: 'ninguno' | 'victoria' | 'derrota', mensaje?: string } {
-  this.letrasDesactivadas.push(letra);
-  let acierto = false;
+  /**
+   * Cantidad de letras acertadas por el jugador.
+   */
+  aciertos: number = 0;
 
-  for (let i = 0; i < this.palabra.length; i++) {
-    if (this.palabra[i] === letra && this.palabraMostrada[i] === '_') {
-      this.palabraMostrada[i] = letra;
-      acierto = true;
-    }
+  /**
+   * Cantidad de letras falladas por el jugador.
+   */
+  errores: number = 0;
+
+  /**
+   * Número máximo de intentos permitidos antes de perder.
+   */
+  intentosMaximos: number = 5;
+
+  /**
+   * Número de intentos actuales realizados por el jugador.
+   */
+  intentosActuales: number = 0;
+
+  /**
+   * Ruta de la imagen que representa el estado actual del juego (ahorcado).
+   */
+  imagenActual: string = 'images/ahorcado/ahorcado0.png';
+
+  /**
+   * Constructor de la clase.
+   * 
+   * Al crear la instancia del servicio, se inicializa automáticamente el juego.
+   */
+  constructor() {
+    this.iniciarJuego();
   }
 
-  if (acierto) {
-    this.aciertos++;
-    if (!this.palabraMostrada.includes('_')) {
-      return { resultado: 'victoria', mensaje: '¡Felicitaciones, adivinaste la palabra!' };
-    }
-  } else {
-    this.errores++;
-    this.intentosActuales++;
-    this.imagenActual = `images/ahorcado/ahorcado${this.intentosActuales}.png`;
+  /**
+   * Inicializa el juego:
+   * - Selecciona aleatoriamente una palabra del listado de animales.
+   * - Configura la palabraMostrada con guiones bajos y la primera letra visible.
+   * - Resetea los contadores de aciertos, errores e intentos.
+   * - Restablece la imagen inicial del ahorcado.
+   */
+  iniciarJuego(): void {
+    const animalAleatorio = this.animales[Math.floor(Math.random() * this.animales.length)];
+    this.palabra = animalAleatorio.nombre;
 
-    if (this.intentosActuales >= this.intentosMaximos) {
-      return { resultado: 'derrota', mensaje: `La palabra era: ${this.palabra}` };
-    }
+    this.palabraMostrada = Array(this.palabra.length).fill('_');
+    this.palabraMostrada[0] = this.palabra[0]; // Mostrar siempre la primera letra como pista
+
+    this.letrasDesactivadas = [];
+    this.aciertos = 0;
+    this.errores = 0;
+    this.intentosActuales = 0;
+    this.imagenActual = 'images/ahorcado/ahorcado0.png';
   }
 
-  return { resultado: 'ninguno' };
+  /**
+   * Procesa la letra seleccionada por el jugador:
+   * - Desactiva la letra seleccionada para que no se pueda volver a elegir.
+   * - Verifica si la letra forma parte de la palabra a adivinar.
+   * - Actualiza el progreso del jugador (aciertos o errores).
+   * - Actualiza la imagen del ahorcado si se falla un intento.
+   * 
+   * @param letra Letra seleccionada por el jugador.
+   * @returns Un objeto indicando el resultado:
+   *          - 'ninguno' si el juego continúa,
+   *          - 'victoria' si adivinó toda la palabra,
+   *          - 'derrota' si se quedó sin intentos.
+   */
+  intentarLetra(letra: string): { resultado: 'ninguno' | 'victoria' | 'derrota', mensaje?: string } {
+    this.letrasDesactivadas.push(letra);
+    let acierto = false;
+
+    // Recorrer cada letra de la palabra para verificar si la seleccionada coincide
+    for (let i = 0; i < this.palabra.length; i++) {
+      if (this.palabra[i] === letra && this.palabraMostrada[i] === '_') {
+        this.palabraMostrada[i] = letra;
+        acierto = true;
+      }
+    }
+
+    if (acierto) {
+      this.aciertos++;
+
+      // Verificar si ya no quedan guiones bajos (todas las letras adivinadas)
+      if (!this.palabraMostrada.includes('_')) {
+        return { resultado: 'victoria', mensaje: '¡Felicitaciones, adivinaste la palabra!' };
+      }
+    } else {
+      this.errores++;
+      this.intentosActuales++;
+      this.imagenActual = `images/ahorcado/ahorcado${this.intentosActuales}.png`;
+
+      // Si se superaron los intentos máximos, el jugador pierde
+      if (this.intentosActuales >= this.intentosMaximos) {
+        return { resultado: 'derrota', mensaje: `La palabra era: ${this.palabra}` };
+      }
+    }
+
+    // Si no ganó ni perdió, el juego continúa
+    return { resultado: 'ninguno' };
+  }
 }
-}
+  

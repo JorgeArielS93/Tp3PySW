@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { JuegoAhorcadoService } from '../../services/juego-ahorcado.service';
-declare var bootstrap: any; // 👈 Agregá esto
+declare var bootstrap: any; //  Agregá esto
 
 @Component({
   selector: 'app-punto3',
@@ -10,56 +10,74 @@ declare var bootstrap: any; // 👈 Agregá esto
   styleUrl: './punto3.component.css',
 })
 export class Punto3Component {
-  // contador:number=0
-
-  // incrementar(){
-  // this.contador++;
-  // }
-
-  // decrementar() {
-  //   if (this.contador <= 0) {
-  //     alert('⚠️ No se permiten números negativos');
-  //   } else {
-  //     this.contador--;
-  //   }
-  // }
-  // reestrablecer(){
-  //   this.contador=0
-  // }
-  // ***********************Juego Ahorcado***********************
-
   /**
    * Arreglo que contiene todas las letras del abecedario en mayúscula.
-   * Se utiliza para mostrar las opciones de letras al usuario.
+   * Se utiliza para mostrar los botones de letras al usuario.
    */
   abecedario: string[] = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
   /**
-   * Título del modal que muestra el resultado del juego (victoria o derrota).
+   * Título que se mostrará en el modal del resultado (ganar o perder).
    */
   resultadoTitulo: string = '';
 
   /**
-   * Mensaje del modal que proporciona más detalles sobre el resultado del juego.
+   * Mensaje que se mostrará en el cuerpo del modal, describiendo el resultado.
    */
   resultadoMensaje: string = '';
 
   /**
-   * Constructor de la clase.
+   * Constructor de la clase Punto3Component.
    *
-   * Inyecta el servicio JuegoAhorcadoService que gestiona la lógica del juego.
-   * @param juegoService Instancia del servicio del ahorcado que maneja el estado del juego.
+   * Inyecta el servicio JuegoAhorcadoService que gestiona la lógica principal del juego.
+   * @param juegoService Instancia del servicio del juego del ahorcado.
    */
-  constructor(public juegoService: JuegoAhorcadoService) {
+  constructor(private juegoService: JuegoAhorcadoService) {}
 
+  /**
+   * Getter que expone la imagen actual del estado del juego para el template.
+   * Permite mostrar la imagen actualizada sin acceder directamente al servicio en el HTML.
+   */
+  get imagenActual(): string {
+    return this.juegoService.imagenActual;
   }
 
   /**
-   * Procesa la letra seleccionada llamando al servicio, y muestra un modal si el usuario gana o pierde.
-   *
-   * @param letra Letra que seleccionó el usuario.
+   * Getter que expone la palabra mostrada (letras adivinadas y guiones bajos) para el template.
    */
-  desactivarLetra(letra: string) {
+  get palabraMostrada(): string[] {
+    return this.juegoService.palabraMostrada;
+  }
+
+  /**
+   * Getter que expone las letras desactivadas (ya usadas) para el template.
+   */
+  get letrasDesactivadas(): string[] {
+    return this.juegoService.letrasDesactivadas;
+  }
+
+  /**
+   * Getter que expone la cantidad de aciertos que lleva el jugador.
+   */
+  get aciertos(): number {
+    return this.juegoService.aciertos;
+  }
+
+  /**
+   * Getter que expone la cantidad de errores cometidos por el jugador.
+   */
+  get errores(): number {
+    return this.juegoService.errores;
+  }
+
+  /**
+   * Procesa la letra seleccionada:
+   * - Llama al servicio para validar la letra.
+   * - Según el resultado, puede mostrar un modal de victoria o derrota.
+   *
+   * @param letra Letra seleccionada por el usuario en el juego.
+   */
+  desactivarLetra(letra: string): void {
     const resultado = this.juegoService.intentarLetra(letra);
 
     if (resultado.resultado === 'victoria') {
@@ -70,31 +88,29 @@ export class Punto3Component {
   }
 
   /**
-   * Reinicia el juego llamando al servicio.
-   *
-   * Resetea la palabra, errores, aciertos, letras desactivadas e imagen inicial.
+   * Reinicia el juego:
+   * - Vuelve a empezar desde cero.
+   * - Restaura la palabra, los contadores y la imagen inicial.
    */
-  reiniciarJuego() {
+  reiniciarJuego(): void {
     this.juegoService.iniciarJuego();
   }
 
   /**
-   * Muestra un modal con el resultado del juego (ganar o perder).
-   * El modal se muestra con un mensaje de victoria o derrota, dependiendo del estado actual del juego.
-   * @param titulo Título del modal, que indica si el jugador ganó o perdió
-   * @param mensaje Mensaje del modal que proporciona más detalles sobre el resultado
+   * Muestra el modal de Bootstrap con el resultado del juego.
+   *
+   * @param titulo Texto que aparecerá como título del modal.
+   * @param mensaje Texto que aparecerá como mensaje en el cuerpo del modal.
    */
-  mostrarModal(titulo: string, mensaje: string) {
-    // Asignar el título y el mensaje que se mostrarán en el modal
+  mostrarModal(titulo: string, mensaje: string): void {
     this.resultadoTitulo = titulo;
     this.resultadoMensaje = mensaje;
 
-    // Mostrar el modal con el resultado del juego
     const modalElemento = document.getElementById('resultadoModal');
     if (modalElemento) {
       const modal = new bootstrap.Modal(modalElemento, {
-        backdrop: 'static', // No permitir cerrar el modal haciendo clic fuera de él
-        keyboard: false, // No permitir cerrar el modal con la tecla Esc
+        backdrop: 'static', // No permitir cerrar el modal clickeando afuera
+        keyboard: false,    // No permitir cerrar el modal presionando "ESC"
       });
       modal.show();
     }
