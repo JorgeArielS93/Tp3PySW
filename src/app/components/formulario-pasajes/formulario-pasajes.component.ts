@@ -193,8 +193,28 @@ export class FormularioPasajesComponent implements OnInit, OnDestroy { // Implem
     boletoAGuardar.dni = boletoData.dni;
     boletoAGuardar.precio = boletoData.precio;
     boletoAGuardar.categoria = Number(boletoData.categoria);
-    boletoAGuardar.fechaCompra = new Date(boletoData.fechaCompra);
     boletoAGuardar.email = boletoData.email;
+    // La variable boletoData.fechaCompra es una cadena en formato "YYYY-MM-DD"
+    const fechaCompraStringDelForm = boletoData.fechaCompra; 
+
+    // Parseamos la cadena "YYYY-MM-DD" para construir el objeto Date
+    // interpretándolo como fecha local y no UTC.
+    const dateParts = fechaCompraStringDelForm.split('-');
+    const year = parseInt(dateParts[0], 10);
+    const month = parseInt(dateParts[1], 10) - 1; // El mes en el constructor de Date es 0-indexado (0=Enero, 11=Diciembre)
+    const day = parseInt(dateParts[2], 10);
+
+    // Creamos el objeto Date. Esto establecerá la hora a 00:00:00 en la zona horaria local del navegador.
+    const fechaCompraAjustada = new Date(year, month, day); 
+    
+    // Verificamos si la fecha es válida (por si acaso la cadena del form es incorrecta)
+    if (isNaN(fechaCompraAjustada.getTime())) {
+        console.error('Error: La fecha de compra del formulario es inválida:', fechaCompraStringDelForm);
+        // Aquí podrías añadir lógica para notificar al usuario o detener el guardado.
+        return; 
+    }
+
+    boletoAGuardar.fechaCompra = fechaCompraAjustada;
 
     // El precioTotal del boleto A GUARDAR DEBE calcularse antes de pasarlo al servicio,
     // usando la misma lógica consistente. Puedes usar el método del modelo aquí también.
