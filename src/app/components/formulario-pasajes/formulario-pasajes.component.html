@@ -1,0 +1,116 @@
+<div class="bg-light mt-2">
+  <div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="col-md-6 bg-white p-5 rounded shadow">
+      <h2 class="text-center mb-4">{{ accion === 'new' ? 'Registrar Boleto' : 'Editar Boleto' }}</h2>
+
+      <form [formGroup]="boletoForm" (ngSubmit)="guardarBoleto()">
+        <input type="hidden" formControlName="_id">
+
+        <div class="mb-3">
+          <label for="dni" class="form-label">DNI</label>
+          <input type="number" class="form-control" id="dni" formControlName="dni" required>
+          <div *ngIf="boletoForm.get('dni')?.invalid && (boletoForm.get('dni')?.dirty || boletoForm.get('dni')?.touched)" class="alert alert-danger mt-1">
+             El DNI es obligatorio.
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="precio" class="form-label">Precio</label>
+           <input type="number" class="form-control" id="precio" formControlName="precio" required min="0">
+           <div *ngIf="boletoForm.get('precio')?.invalid && (boletoForm.get('precio')?.dirty || boletoForm.get('precio')?.touched)" class="alert alert-danger mt-1">
+             El Precio es obligatorio y debe ser mayor o igual a 0.
+           </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="categoria" class="form-label">Categoría del Turista</label>
+           <select class="form-select" id="categoria" formControlName="categoria" required>
+            <option [value]="null" disabled>Seleccione una opción</option>
+            <option [value]="1">Menor</option>
+            <option [value]="2">Adulto</option>
+            <option [value]="3">Jubilado</option>
+          </select>
+          <div *ngIf="boletoForm.get('categoria')?.invalid && (boletoForm.get('categoria')?.dirty || boletoForm.get('categoria')?.touched)" class="alert alert-danger mt-1">
+            La Categoría es obligatoria.
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="fechaCompra" class="form-label">Fecha de Compra</label>
+           <input type="date" class="form-control" id="fechaCompra" formControlName="fechaCompra" required>
+           <div *ngIf="boletoForm.get('fechaCompra')?.invalid && (boletoForm.get('fechaCompra')?.dirty || boletoForm.get('fechaCompra')?.touched)" class="alert alert-danger mt-1">
+            La Fecha de Compra es obligatoria.
+           </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="email" class="form-label">Correo Electrónico</label>
+           <input type="email" class="form-control" id="email" formControlName="email" required>
+           <div *ngIf="boletoForm.get('email')?.invalid && (boletoForm.get('email')?.dirty || boletoForm.get('email')?.touched)" class="alert alert-danger mt-1">
+            El Email es obligatorio y debe tener un formato válido.
+           </div>
+        </div>
+
+        <button type="submit" class="btn btn-success w-100">
+          {{ accion === 'new' ? 'Guardar Boleto Nuevo' : 'Actualizar Boleto' }}
+        </button>
+
+      </form>
+       <button *ngIf="accion === 'update'" class="btn btn-secondary w-100 mt-2" (click)="navegarNuevoBoleto()">
+            Crear Nuevo Boleto
+        </button>
+    </div>
+  </div>
+</div>
+
+<table  class=" table row-border hover mt-2">
+  <thead>
+    <tr>
+      <th>DNI</th>
+      <th>Fecha de Compra</th>
+      <th>e-mail</th>
+      <th>Categoria</th>
+      <th>Total a Pagar</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let b of listaBoletos">
+      <td>{{ b.dni }}</td>
+      <td>{{ b.fechaCompra | date: 'dd/MM/yyyy' }}</td>
+      <td>{{ b.email }}</td>
+      <td>{{ b.getCategoriaNombre() }}</td>
+      <td>{{ b.precioTotal | currency: 'ARS' : 'symbol' : '1.2-2' }}</td>
+      <td>
+        <button class="btn btn-danger btn-sm me-1" (click)="eliminarBoleto(b._id)">
+          Eliminar
+        </button>
+        <button class="btn btn-warning btn-sm" (click)="editarBoleto(b._id)">
+          Editar
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="container mt-4">
+  <h3>Resumen de Ventas por Categoría</h3>
+  <ul class="list-group">
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+          Total Adultos:
+          <span>{{ resumenVentas.Adulto | currency: 'ARS' : 'symbol' : '1.2-2' }}</span>
+      </li>
+       <li class="list-group-item d-flex justify-content-between align-items-center">
+          Total Menores:
+          <span>{{ resumenVentas.Menor | currency: 'ARS' : 'symbol' : '1.2-2' }}</span>
+      </li>
+       <li class="list-group-item d-flex justify-content-between align-items-center">
+          Total Jubilados:
+          <span>{{ resumenVentas.Jubilado | currency: 'ARS' : 'symbol' : '1.2-2' }}</span>
+      </li>
+      <li class="list-group-item d-flex justify-content-between align-items-center font-weight-bold">
+          <strong>Total General:</strong>
+          <span><strong>{{ resumenVentas.totalGeneral | currency: 'ARS' : 'symbol' : '1.2-2' }}</strong></span>
+      </li>
+  </ul>
+</div>
