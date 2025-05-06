@@ -35,6 +35,13 @@
           </div>
         </div>
 
+        <div *ngIf="dynamicPrecioTotal !== null" class="mb-3 p-3 border rounded bg-info text-white">
+            <label class="form-label mb-0"><strong>Precio Total Estimado:</strong></label>
+            <div class="h5 mb-0">
+               {{ dynamicPrecioTotal | currency: 'ARS' : 'symbol' : '1.2-2' }}
+            </div>
+        </div>
+
         <div class="mb-3">
           <label for="fechaCompra" class="form-label">Fecha de Compra</label>
            <input type="date" class="form-control" id="fechaCompra" formControlName="fechaCompra" required>
@@ -54,8 +61,8 @@
         <button type="submit" class="btn btn-success w-100">
           {{ accion === 'new' ? 'Guardar Boleto Nuevo' : 'Actualizar Boleto' }}
         </button>
-
       </form>
+
        <button *ngIf="accion === 'update'" class="btn btn-secondary w-100 mt-2" (click)="navegarNuevoBoleto()">
             Crear Nuevo Boleto
         </button>
@@ -63,54 +70,96 @@
   </div>
 </div>
 
-<table  class=" table row-border hover mt-2">
-  <thead>
-    <tr>
-      <th>DNI</th>
-      <th>Fecha de Compra</th>
-      <th>e-mail</th>
-      <th>Categoria</th>
-      <th>Total a Pagar</th>
-      <th>Acciones</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let b of listaBoletos">
-      <td>{{ b.dni }}</td>
-      <td>{{ b.fechaCompra | date: 'dd/MM/yyyy' }}</td>
-      <td>{{ b.email }}</td>
-      <td>{{ b.getCategoriaNombre() }}</td>
-      <td>{{ b.precioTotal | currency: 'ARS' : 'symbol' : '1.2-2' }}</td>
-      <td>
-        <button class="btn btn-danger btn-sm me-1" (click)="eliminarBoleto(b._id)">
-          Eliminar
-        </button>
-        <button class="btn btn-warning btn-sm" (click)="editarBoleto(b._id)">
-          Editar
-        </button>
-      </td>
-    </tr>
-  </tbody>
-</table>
 
-<div class="container mt-4">
-  <h3>Resumen de Ventas por Categoría</h3>
-  <ul class="list-group">
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-          Total Adultos:
-          <span>{{ resumenVentas.Adulto | currency: 'ARS' : 'symbol' : '1.2-2' }}</span>
-      </li>
-       <li class="list-group-item d-flex justify-content-between align-items-center">
-          Total Menores:
-          <span>{{ resumenVentas.Menor | currency: 'ARS' : 'symbol' : '1.2-2' }}</span>
-      </li>
-       <li class="list-group-item d-flex justify-content-between align-items-center">
-          Total Jubilados:
-          <span>{{ resumenVentas.Jubilado | currency: 'ARS' : 'symbol' : '1.2-2' }}</span>
-      </li>
-      <li class="list-group-item d-flex justify-content-between align-items-center font-weight-bold">
-          <strong>Total General:</strong>
-          <span><strong>{{ resumenVentas.totalGeneral | currency: 'ARS' : 'symbol' : '1.2-2' }}</strong></span>
-      </li>
-  </ul>
+
+<div class="container mt-4"> <ul class="nav nav-tabs" role="tablist">
+  <li class="nav-item" role="presentation">
+    <a class="nav-link"
+       [class.active]="activeTab === 'boletos'"
+       (click)="selectTab('boletos')"
+       role="tab"
+       aria-controls="boletos-tab-pane"
+       [attr.aria-selected]="activeTab === 'boletos' ? 'true' : 'false'"
+       href="javascript:void(0)"> Boletos vendidos
+    </a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link"
+       [class.active]="activeTab === 'resumen'"
+       (click)="selectTab('resumen')"
+       role="tab"
+       aria-controls="resumen-tab-pane"
+       [attr.aria-selected]="activeTab === 'resumen' ? 'true' : 'false'"
+       href="javascript:void(0)"> Resumen
+    </a>
+  </li>
+</ul>
+
+<div class="tab-content">
+  <div class="tab-pane fade"
+       [class.show]="activeTab === 'boletos'"
+       [class.active]="activeTab === 'boletos'"
+       id="boletos-tab-pane"
+       role="tabpanel"
+       aria-labelledby="boletos-tab">
+    <table class="table row-border hover mt-2 table-striped">
+      <thead>
+        <tr>
+          <th>DNI</th>
+          <th>Fecha de Compra</th>
+          <th>e-mail</th>
+          <th>Categoria</th>
+          <th>Total a Pagar</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let b of listaBoletos">
+          <td>{{ b.dni }}</td>
+          <td>{{ b.fechaCompra | date: 'dd/MM/yyyy' }}</td>
+          <td>{{ b.email }}</td>
+          <td>{{ b.getCategoriaNombre() }}</td>
+          <td>{{ b.precioTotal | currency: 'ARS' : 'symbol' : '1.2-2' }}</td>
+          <td>
+            <button class="btn btn-danger btn-sm me-1" (click)="eliminarBoleto(b._id)">
+              Eliminar
+            </button>
+            <button class="btn btn-warning btn-sm" (click)="editarBoleto(b._id)">
+              Editar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tab-pane fade"
+       [class.show]="activeTab === 'resumen'"
+       [class.active]="activeTab === 'resumen'"
+       id="resumen-tab-pane"
+       role="tabpanel"
+       aria-labelledby="resumen-tab">
+     <div class="container mt-4">
+         <h3>Resumen de Ventas por Categoría</h3>
+         <ul class="list-group">
+             <li class="list-group-item d-flex justify-content-between align-items-center">
+                 Total Adultos:
+                 <span>{{ resumenVentas.Adulto | currency: 'ARS' : 'symbol' : '1.2-2' }}</span>
+             </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                 Total Menores:
+                 <span>{{ resumenVentas.Menor | currency: 'ARS' : 'symbol' : '1.2-2' }}</span>
+             </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                 Total Jubilados:
+                 <span>{{ resumenVentas.Jubilado | currency: 'ARS' : 'symbol' : '1.2-2' }}</span>
+             </li>
+             <li class="list-group-item d-flex justify-content-between align-items-center font-weight-bold">
+                 <strong>Total General:</strong>
+                 <span><strong>{{ resumenVentas.totalGeneral | currency: 'ARS' : 'symbol' : '1.2-2' }}</strong></span>
+             </li>
+         </ul>
+     </div>
+  </div>
+</div>
 </div>
